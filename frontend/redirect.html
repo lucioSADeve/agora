@@ -14,25 +14,31 @@
                 const phoneNumber = urlParams.get('phone');
                 const message = urlParams.get('message') || 'oii vi seu anuncio';
 
+                console.log('Debug - Número recebido:', phoneNumber);
+
                 // Verifica se o número existe e está ativo
                 const response = await fetch('https://agora-production-900d.up.railway.app/api/numbers');
                 const numbers = await response.json();
                 
-                const activeNumber = numbers.find(n => 
-                    n.phoneNumber === phoneNumber && n.status === 'Ativo'
-                );
+                console.log('Debug - Números no banco:', numbers);
+
+                const activeNumber = numbers.find(n => {
+                    console.log('Debug - Comparando:', n.phoneNumber, phoneNumber);
+                    return n.phoneNumber === phoneNumber && n.status === 'Ativo';
+                });
+
+                console.log('Debug - Número encontrado:', activeNumber);
 
                 if (activeNumber) {
-                    // Se encontrar número ativo, redireciona para o WhatsApp com a mensagem
+                    console.log('Debug - Redirecionando para WhatsApp');
                     window.location.href = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
                 } else {
-                    // Se não encontrar ou estiver inativo, usa a URL de fallback
+                    console.log('Debug - Redirecionando para fallback');
                     const fallbackUrl = localStorage.getItem('fallbackUrl') || 'http://google.com';
                     window.location.href = fallbackUrl;
                 }
             } catch (error) {
-                console.error('Erro:', error);
-                // Em caso de erro, usa a URL de fallback
+                console.error('Debug - Erro:', error);
                 const fallbackUrl = localStorage.getItem('fallbackUrl') || 'http://google.com';
                 window.location.href = fallbackUrl;
             }
