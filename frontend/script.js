@@ -1,5 +1,5 @@
 // Configuração da API
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://agora-production-900d.up.railway.app/api';
 
 // Carrega os números na tabela ao iniciar
 async function loadNumbers() {
