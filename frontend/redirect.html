@@ -9,9 +9,10 @@
     <script>
         async function checkNumberAndRedirect() {
             try {
-                // Pega o número do WhatsApp da URL
+                // Pega o número e mensagem da URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const phoneNumber = urlParams.get('phone');
+                const message = urlParams.get('message') || 'oii vi seu anuncio';
 
                 // Verifica se o número existe e está ativo
                 const response = await fetch('https://agora-production-900d.up.railway.app/api/numbers');
@@ -22,17 +23,17 @@
                 );
 
                 if (activeNumber) {
-                    // Se encontrar número ativo, redireciona para o WhatsApp
-                    window.location.href = `https://wa.me/${phoneNumber}`;
+                    // Se encontrar número ativo, redireciona para o WhatsApp com a mensagem
+                    window.location.href = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
                 } else {
-                    // Se não encontrar, usa a URL de fallback
-                    const fallbackUrl = localStorage.getItem('fallbackUrl') || 'https://netmastertvonline.com/melhor-iptv-3/';
+                    // Se não encontrar ou estiver inativo, usa a URL de fallback
+                    const fallbackUrl = localStorage.getItem('fallbackUrl') || 'http://google.com';
                     window.location.href = fallbackUrl;
                 }
             } catch (error) {
                 console.error('Erro:', error);
                 // Em caso de erro, usa a URL de fallback
-                const fallbackUrl = localStorage.getItem('fallbackUrl') || 'https://netmastertvonline.com/melhor-iptv-3/';
+                const fallbackUrl = localStorage.getItem('fallbackUrl') || 'http://google.com';
                 window.location.href = fallbackUrl;
             }
         }
