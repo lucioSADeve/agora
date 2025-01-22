@@ -9,39 +9,33 @@
     <script>
         async function checkNumberAndRedirect() {
             try {
-                // Pega o número e mensagem da URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const phoneNumber = urlParams.get('phone');
-                const message = urlParams.get('message') || 'oii vi seu anuncio';
-
-                // Se não tiver número na URL, usa URL de fallback
-                if (!phoneNumber) {
-                    const fallbackUrl = localStorage.getItem('fallbackUrl') || 'http://google.com';
-                    return window.location.href = fallbackUrl;
-                }
-
                 // Verifica se o número existe e está ativo
                 const response = await fetch('https://agora-production-900d.up.railway.app/api/numbers');
                 const numbers = await response.json();
 
-                // Procura o número na lista de números ativos
-                const activeNumber = numbers.find(n => 
-                    n.phoneNumber === phoneNumber && 
-                    n.status === 'Ativo'
-                );
+                // Filtra apenas números ativos
+                const activeNumbers = numbers.filter(n => n.status === 'Ativo');
 
-                // Se encontrar o número ativo, redireciona para WhatsApp
-                if (activeNumber) {
-                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                // Se tiver números ativos
+                if (activeNumbers.length > 0) {
+                    // Pega o contador do servidor
+                    const counterResponse = await fetch('https://agora-production-900d.up.railway.app/api/counter');
+                    const counter = await counterResponse.json();
+                    let currentIndex = counter.value % activeNumbers.length;
+
+                    // Pega o número da vez
+                    const selectedNumber = activeNumbers[currentIndex];
+
+                    // Redireciona para o WhatsApp do número selecionado
+                    const whatsappUrl = `https://wa.me/${selectedNumber.phoneNumber}?text=${encodeURIComponent(selectedNumber.message || 'oii vi seu anuncio')}`;
                     window.location.href = whatsappUrl;
                 } else {
-                    // Se não encontrar ou estiver inativo, usa URL de fallback
-                    const fallbackUrl = localStorage.getItem('fallbackUrl');
-                    window.location.href = fallbackUrl || 'http://google.com';
+                    // Se não tiver números ativos, usa URL de fallback
+                    const fallbackUrl = localStorage.getItem('fallbackUrl') || 'http://google.com';
+                    window.location.href = fallbackUrl;
                 }
             } catch (error) {
                 console.error('Erro:', error);
-                // Em caso de erro, usa URL de fallback
                 const fallbackUrl = localStorage.getItem('fallbackUrl') || 'http://google.com';
                 window.location.href = fallbackUrl;
             }

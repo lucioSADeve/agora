@@ -24,6 +24,14 @@ const numberSchema = new mongoose.Schema({
 
 const Number = mongoose.model('Number', numberSchema);
 
+// Schema para o contador
+const counterSchema = new mongoose.Schema({
+    key: { type: String, required: true, unique: true },
+    value: { type: Number, default: 0 }
+});
+
+const Counter = mongoose.model('Counter', counterSchema);
+
 // Rotas
 app.get('/api/numbers', async (req, res) => {
   try {
@@ -60,6 +68,27 @@ app.delete('/api/numbers/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+});
+
+// Rota para pegar e incrementar o contador
+app.get('/api/counter', async (req, res) => {
+    try {
+        let counter = await Counter.findOne({ key: 'numberIndex' });
+        
+        if (!counter) {
+            counter = new Counter({ key: 'numberIndex', value: 0 });
+        }
+
+        const currentValue = counter.value;
+        
+        // Incrementa o contador
+        counter.value = (currentValue + 1);
+        await counter.save();
+        
+        res.json({ value: currentValue });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 });
 
 const PORT = process.env.PORT || 3000;
