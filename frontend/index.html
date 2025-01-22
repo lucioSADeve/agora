@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de WhatsApp</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Gerenciador de WhatsApp</h1>
+    <form id="whatsappForm">
+        <input type="text" id="phoneNumber" placeholder="Número de telefone" required>
+        <input type="text" id="operator" placeholder="Nome do Operador" required>
+        <input type="text" id="message" placeholder="Mensagem personalizada">
+        <button type="submit">Adicionar Número</button>
+    </form>
+    
+    <!-- Campo para URL de redirecionamento alternativa -->
+    <div style="margin-top: 20px;">
+        <label for="fallbackUrl">URL de Redirecionamento Alternativa:</label>
+        <input type="text" id="fallbackUrl" placeholder="Digite a URL aqui">
+    </div>
+    
+    <!-- Link para a página de redirecionamento -->
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="redirect.html" target="_blank" style="text-decoration: none; padding: 10px 15px; background-color: #007bff; color: white; border-radius: 4px;">Ir para Redirecionamento</a>
+    </div>
+
+    <table id="numbersTable">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Operador</th>
+                <th>Tipo</th>
+                <th>Link Original</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="numbersContainer"></tbody>
+    </table>
+    <script src="script.js"></script>
+</body>
+</html>

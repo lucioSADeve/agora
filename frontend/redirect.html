@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecionamento WhatsApp</title>
+    <script>
+        const API_URL = 'http://localhost:3000/api'; // Alterar para URL da sua API quando hospedar
+        let currentIndex = 0;
+
+        // Função para buscar números do MongoDB
+        async function getActiveNumbers() {
+            try {
+                const response = await fetch(`${API_URL}/numbers`);
+                const numbers = await response.json();
+                return numbers.filter(item => item.status === 'Ativo');
+            } catch (error) {
+                console.error('Erro ao buscar números:', error);
+                return [];
+            }
+        }
+
+        // Função para redirecionar
+        async function redirectToNextNumber() {
+            try {
+                const activeNumbers = await getActiveNumbers();
+
+                if (activeNumbers.length > 0) {
+                    // Recupera o último índice usado
+                    currentIndex = parseInt(localStorage.getItem('currentIndex') || '0');
+                    
+                    // Se o índice for maior que o número de números ativos, reinicia
+                    if (currentIndex >= activeNumbers.length) {
+                        currentIndex = 0;
+                    }
+
+                    const currentNumber = activeNumbers[currentIndex];
+                    const shareLink = `https://wa.me/${currentNumber.phoneNumber}?text=${encodeURIComponent(currentNumber.message || 'oii vi seu anuncio')}`;
+                    
+                    // Salva o próximo índice
+                    localStorage.setItem('currentIndex', (currentIndex + 1).toString());
+                    
+                    // Redireciona
+                    window.location.href = shareLink;
+                } else {
+                    // Se não houver números ativos, usa a URL de fallback
+                    const fallbackUrl = localStorage.getItem('fallbackUrl') || 'https://www.netmastertvonline.com/melhor-iptv-3';
+                    window.location.href = fallbackUrl;
+                }
+            } catch (error) {
+                console.error('Erro no redirecionamento:', error);
+                alert('Erro ao redirecionar. Por favor, tente novamente.');
+            }
+        }
+
+        // Inicia o redirecionamento quando a página carregar
+        window.onload = redirectToNextNumber;
+    </script>
+</head>
+<body>
+    <h1>Redirecionando...</h1>
+    <p>Por favor, aguarde...</p>
+</body>
+</html>
