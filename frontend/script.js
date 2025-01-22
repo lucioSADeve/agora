@@ -1,15 +1,31 @@
 // Configuração da API
 const API_URL = 'https://agora-production-900d.up.railway.app/api';
 
+// Headers padrão para todas as requisições
+const defaultHeaders = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Access-Control-Allow-Origin': '*'
+};
+
 // Carrega os números na tabela ao iniciar
 async function loadNumbers() {
     try {
-        const response = await fetch(`${API_URL}/numbers`);
+        const response = await fetch(`${API_URL}/numbers`, {
+            headers: defaultHeaders
+        });
         const numbers = await response.json();
         document.getElementById('numbersContainer').innerHTML = '';
         numbers.forEach(item => addNumberToTable(item));
+
+        // Carrega a URL de fallback do servidor
+        const fallbackResponse = await fetch(`${API_URL}/fallback-url`, {
+            headers: defaultHeaders
+        });
+        const fallbackData = await fallbackResponse.json();
+        document.getElementById('fallbackUrl').value = fallbackData.url || '';
     } catch (error) {
-        console.error('Erro ao carregar números:', error);
+        console.error('Erro ao carregar dados:', error);
     }
 }
 
@@ -25,13 +41,9 @@ document.getElementById('whatsappForm').addEventListener('submit', async functio
         const operator = document.getElementById('operator').value.trim();
         const message = document.getElementById('message').value.trim() || "oii vi seu anuncio";
 
-        console.log('Enviando dados:', { phoneNumber, operator, message }); // Debug
-
         const response = await fetch(`${API_URL}/numbers`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: defaultHeaders,
             body: JSON.stringify({
                 phoneNumber,
                 operator,
@@ -40,8 +52,6 @@ document.getElementById('whatsappForm').addEventListener('submit', async functio
                 status: "Ativo"
             })
         });
-
-        console.log('Status da resposta:', response.status); // Debug
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -69,7 +79,7 @@ function addNumberToTable(item) {
         <td class="status">${item.status || 'Ativo'}</td>
         <td>
             <button onclick="removeNumber(this)">Excluir</button>
-            <button onclick="toggleStatus(this)">Desativar</button>
+            <button onclick="toggleStatus(this)">${item.status === 'Ativo' ? 'Desativar' : 'Ativar'}</button>
         </td>
     `;
     document.getElementById('numbersContainer').appendChild(newRow);
@@ -82,7 +92,8 @@ async function removeNumber(button) {
         const id = row.dataset.id;
 
         const response = await fetch(`${API_URL}/numbers/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: defaultHeaders
         });
 
         if (!response.ok) {
@@ -106,9 +117,7 @@ async function toggleStatus(button) {
 
         const response = await fetch(`${API_URL}/numbers/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: defaultHeaders,
             body: JSON.stringify({ status: newStatus })
         });
 
@@ -126,12 +135,25 @@ async function toggleStatus(button) {
 
 // Gerenciamento da URL de fallback
 const fallbackUrlInput = document.getElementById('fallbackUrl');
-fallbackUrlInput.value = localStorage.getItem('fallbackUrl') || '';
 
-fallbackUrlInput.addEventListener('input', function() {
-    let url = fallbackUrlInput.value.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://') && url.length > 0) {
-        url = 'http://' + url;
+fallbackUrlInput.addEventListener('input', async function() {
+    try {
+        let url = fallbackUrlInput.value.trim();
+        if (!url.startsWith('http://') && !url.startsWith('https://') && url.length > 0) {
+            url = 'http://' + url;
+        }
+
+        // Salva a URL no servidor
+        const response = await fetch(`${API_URL}/fallback-url`, {
+            method: 'POST',
+            headers: defaultHeaders,
+            body: JSON.stringify({ url })
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao salvar URL');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar URL:', error);
     }
-    localStorage.setItem('fallbackUrl', url);
 });
