@@ -65,7 +65,7 @@ function addNumberToTable(item) {
         <td>${item.phoneNumber}</td>
         <td>${item.operator}</td>
         <td>${item.type || 'Tipo Exemplo'}</td>
-        <td><a href="https://wa.me/${item.phoneNumber}?text=${encodeURIComponent(item.message || 'oii vi seu anuncio')}" target="_blank">Link Original</a></td>
+        <td><a href="redirect.html?phone=${item.phoneNumber}&message=${encodeURIComponent(item.message || 'oii vi seu anuncio')}" target="_blank">Link Original</a></td>
         <td class="status">${item.status || 'Ativo'}</td>
         <td>
             <button onclick="removeNumber(this)">Excluir</button>
